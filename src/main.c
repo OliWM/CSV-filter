@@ -5,7 +5,7 @@
 #define LINE_MAX 100
 #define DELIM "," // CSV delimiter
 
-char *ifile, *ofile, *unmodified_line; //unmodified to be able to print original before it is altered by strtok
+char *ifile, *ofile; //unmodified to be able to print original before it is altered by strtok
 unsigned filter_age_max;
 FILE *istream, *ostream;
 //just initiating them early, will be assigned later
@@ -23,7 +23,7 @@ const char USAGE[] =
 // regular string.
 
 void filter_stream(FILE *istream, FILE *ostream) {
-  char line[LINE_MAX];
+  char line[LINE_MAX], unmodified_line[LINE_MAX];
   char *fgets_return;
   char *name, *age_str;
   size_t line_no = 0;
@@ -39,7 +39,7 @@ void filter_stream(FILE *istream, FILE *ostream) {
       if (strlen(line) > 1) { // probably the extra strlen > 1 is for longer
                               // blank characters like \r\n ?
                               // Assign `name` and `age_str` using `strtok`
-        unmodified_line = line;
+        strcpy(unmodified_line, line); //strcpy because strtok alters line
         name = strtok(line, ",");
         age_str = strtok(nullptr, ","); //NULL because strtok remembers where it left off, and then "," cos counting on line ending after age or that whatever comes next is at least comma-separated.
 
@@ -84,7 +84,7 @@ int main(int argc, char *argv[]) {
   case 2:
     // max-age
     if (!sscanf(argv[1], "%d", &filter_age_max)) {
-      puts("First argument is not an age.\n");
+      puts("First argument is not an age.\n"); //does not check to see if number is negative. But that's not part of assignment
       exit(EXIT_FAILURE);
     }
     break;
